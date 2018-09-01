@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import {Events} from '../cdnbye-core';
+import {Events} from 'core';
 import {handleTSUrl} from '../utils/toolFuns';
 
 class BTScheduler extends EventEmitter {
@@ -10,8 +10,12 @@ class BTScheduler extends EventEmitter {
         this.config = config;
         this.bufMgr = null;
         this.peerMap = new Map();                 // remotePeerId -> dc
-        this.bitset = new Set();                  //本节点的bitfield
-        this.bitCounts = new Map();               //记录peers的每个buffer的总和，用于BT的rearest first策略  index -> count
+        this.bitset = new Set();                  // 本节点的bitfield
+        this.bitCounts = new Map();               // 记录peers的每个buffer的总和，用于BT的rearest first策略  index -> count
+
+        this.targetPeer = null;               // 当前的目标peer
+
+        // 传输控制(单位ms)
 
     }
 
@@ -41,7 +45,7 @@ class BTScheduler extends EventEmitter {
         for (let idx=sn+1;idx<=sn+this.config.urgentOffset+1;idx++) {
             if (!this.bitset.has(idx) && idx !== this.loadingSN && this.bitCounts.has(idx)) {                  //如果这个块没有缓存并且peers有
                 for (let peer of this.peerMap.values()) {                           //找到拥有这个块并且空闲的peer
-                    if (peer.downloading === false && peer.bitset.has(idx)) {
+                    if (peer.isAvailable && peer.bitset.has(idx)) {
                         peer.requestDataBySN(idx, true);
                         logger.debug(`request urgent ${idx} from peer ${peer.remotePeerId}`);
                         requested.push(idx);
@@ -101,6 +105,20 @@ class BTScheduler extends EventEmitter {
         return this.bitCounts.has(sn);
     }
 
+    hasAndSetTargetPeer(sn) {
+        const { logger } = this.engine;
+        if (!(this.hasIdlePeers && this.peersHasSN(sn))) return false;
+        for (let peer of this.peerMap.values()) {
+            if (peer.isAvailable && peer.bitset.has(sn)) {
+                logger.info(`found sn ${sn} from peer ${peer.remotePeerId}`);
+                this.targetPeer = peer;
+                return true;
+            }
+        }
+        logger.warn(`idle peers hasn't sn ${sn}`);
+        return false;
+    }
+
     load(context, config, callbacks) {
         const { logger } = this.engine;
         this.context = context;
@@ -109,24 +127,24 @@ class BTScheduler extends EventEmitter {
         this.callbacks = callbacks;
         this.stats = {trequest: performance.now(), retry: 0, tfirst: 0, tload: 0, loaded: 0};
         this.criticalSeg = {sn: frag.sn, relurl: handledUrl};
-
-        let target;
-        for (let peer of this.peerMap.values()) {
-            if (peer.bitset.has(frag.sn)) {
-                target = peer;
-            }
-        }
-
-        if (target) {
-            // target.requestDataBySN(frag.sn, true);
-            target.requestDataByURL(handledUrl, true);                            //critical的根据url请求
-            logger.info(`request criticalSeg url ${frag.relurl} at ${frag.sn}`);
-        }
+        this.targetPeer.requestDataByURL(handledUrl, true);
+        logger.info(`request criticalSeg url ${frag.relurl} at ${frag.sn}`);
         this.criticaltimeouter = window.setTimeout(this._criticaltimeout.bind(this), this.config.loadTimeout*1000);
     }
 
     get hasPeers() {
         return this.peerMap.size > 0;
+    }
+
+    get peersNum() {
+        return this.peerMap.size;
+    }
+
+    get hasIdlePeers() {
+        const { logger } = this.engine;
+        const idles = this._getIdlePeer().length;
+        logger.info(`peers: ${this.peerMap.size} idle peers: ${idles}`);
+        return idles > 0;
     }
 
     set bufferManager(bm) {
@@ -168,6 +186,11 @@ class BTScheduler extends EventEmitter {
                 dc.bitset.delete(sn);
                 this._decreBitCounts(sn);
             })
+            .on(Events.DC_PIECE_ACK, msg => {
+                if (msg.size) {
+                    this.engine.fetcher.reportUploaded(msg.size);
+                }
+            })
             .on(Events.DC_PIECE, msg => {                                                  //接收到piece事件，即二进制包头
                 if (this.criticalSeg && this.criticalSeg.relurl === msg.url) {                    //接收到critical的响应
                     this.stats.tfirst = Math.max(performance.now(), this.stats.trequest);
@@ -176,7 +199,8 @@ class BTScheduler extends EventEmitter {
             .on(Events.DC_PIECE_NOT_FOUND, msg => {
                 if (this.criticalSeg && this.criticalSeg.relurl === msg.url) {                    //接收到critical未找到的响应
                     window.clearTimeout(this.criticaltimeouter);                             //清除定时器
-                    this.criticaltimeouter = null;
+                    // this.criticaltimeouter = null;
+                    logger.info(`DC_PIECE_NOT_FOUND`);
                     this._criticaltimeout();                                                   //触发超时，由xhr下载
                 }
             })
@@ -189,9 +213,10 @@ class BTScheduler extends EventEmitter {
                     stats.tload = Math.max(stats.tfirst, performance.now());
                     stats.loaded = stats.total = response.data.byteLength;
                     this.criticalSeg = null;
+                    this.context.frag.fromPeerId = dc.remotePeerId;
                     this.callbacks.onSuccess(response, stats, this.context);
                 } else {
-                    this.bufMgr.addBuffer(response.sn, response.url, response.data);
+                    this.bufMgr.addBuffer(response.sn, response.url, response.data, dc.remotePeerId);
                 }
                 this.updateLoadedSN(response.sn);
             })
@@ -215,6 +240,10 @@ class BTScheduler extends EventEmitter {
             })
             .on(Events.DC_TIMEOUT, () => {
                 logger.warn(`DC_TIMEOUT`);
+                if (this.criticaltimeouter) {
+                    window.clearTimeout(this.criticaltimeouter);                             //清除定时器
+                    this._criticaltimeout();
+                }
             })
     }
 
@@ -226,7 +255,7 @@ class BTScheduler extends EventEmitter {
 
     _getIdlePeer() {
         return [...this.peerMap.values()].filter(peer => {
-            return peer.downloading === false;
+            return peer.isAvailable;
         });
     }
 
@@ -256,16 +285,11 @@ class BTScheduler extends EventEmitter {
 
     _criticaltimeout() {
         const { logger } = this.engine;
-        logger.warn(`_criticaltimeout`);
+        logger.warn(`critical request timeout`);
         this.criticalSeg = null;
-        this.callbacks.onTimeout(this.stats, this.context, null);
         this.criticaltimeouter = null;
+        this.callbacks.onTimeout(this.stats, this.context, null);
     }
-}
-
-function handleUrl(url) {
-    // return url;
-    return url.split("?")[0];
 }
 
 

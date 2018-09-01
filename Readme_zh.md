@@ -1,6 +1,6 @@
 <h1 align="center"><a href="" target="_blank" rel="noopener noreferrer"><img width="250" src="figs/cdnbye.png" alt="cdnbye logo"></a></h1>
-<h4 align="center">It's time to say bye to CDN.</h4>
-<p align="center">中小型视频网站省流量神器.</p>
+<h4 align="center">Save Your Bandwidth using WebRTC.</h4>
+<h4 align="center">视频网站省流量神器.</h4>
 <p align="center">
   <a href="https://www.npmjs.com/package/cdnbye"><img src="https://img.shields.io/npm/v/cdnbye.svg?style=flat" alt="npm"></a>
    <a href="https://www.jsdelivr.com/package/npm/cdnbye"><img src="https://data.jsdelivr.com/v1/package/npm/cdnbye/badge" alt="jsdelivr"></a>
@@ -117,7 +117,21 @@ hls.on(Hls.Events.MANIFEST_PARSED,function() {
 ## API文档
 参见 [API.md](docs/中文/API.md)
 
-## 运作原理
+## 信令服务器
+信令服务器用于在WebRTC建立P2P连接过程中交换信令。
+- 自行部署（推荐）
+    - [gosignaler](https://github.com/cdnbye/gosignaler) (Go语言版)
+    - [php-signaler](https://github.com/cdnbye/php-signaler) (PHP版)
+- 第三方免费信令服务
+    - 'wss://signal.cdnbye.com/wss'（本插件默认信令地址，负载较大，不推荐）
+    - 'wss://free.freesignal.net'（由freesignal.net提供的免费版本，推荐）
+
+## 用户案例
+[<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1531253035445&di=7af6cc9ad4abe3d06ba376af22d85131&imgtype=0&src=http%3A%2F%2Fimg.kuai8.com%2Fattaches%2Fintro%2F1213%2F201612131436417407.png" width="120">](http://egame.qq.com/)
+
+如果您也在使用这个开源项目，欢迎通过pull request提交您网站的logo和网址
+
+## 设计&原理
 参见 [设计.md](docs/中文/设计.md)
 
 ## FAQ
@@ -136,6 +150,13 @@ hls.on(Hls.Events.MANIFEST_PARSED,function() {
     - 参见 [clappr-demo.html](demo/clappr-demo.html)
 - [MediaElement.js](http://www.mediaelementjs.com/)
     - 参见 [mediaelement-demo.html](demo/mediaelement-demo.html)
+- [TCPlayer](https://cloud.tencent.com/document/product/267/7479)(腾讯云播放器)
+    - 参见 [tcplayer-demo.html](demo/tcplayer-demo.html)
 - `欢迎贡献您的播放器demo`
     - CDNBye可以集成到内置hls.js的任何H5视频播放器中！
+    
+## 捐赠
+您的捐赠将用于购买服务器以及维持该开源项目的其它开销：）
+
+<img width="250" src="figs/pay.jpeg" alt="cdnbye logo" align="center">
 

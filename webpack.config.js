@@ -22,8 +22,8 @@ const uglifyJsOptions = {
     }
 };
 
-const prodCorePath = path.resolve(__dirname, 'src/cdnbye-core/cdnbye-core');
-const devCorePath = path.resolve(__dirname, 'src/cdnbye-core/_index.js');
+const prodCorePath = 'cdnbye-core';
+const devCorePath = path.resolve(__dirname, 'src/core/cdnbye-core/dist/cdnbye-core.js');
 
 const commonConfig = {
 
@@ -73,19 +73,8 @@ function getPluginsForConfig(minify = false, light = false) {
 function getConstantsForConfig(light = false) {                                             //嵌入全局变量
     return {
         __VERSION__: JSON.stringify(pkgJson.version),
-        __IS_HLSJS_LIGHT__: light,
+        __IS_HLSJS_LIGHT__: light
     };
-}
-
-function getAliasesForLightDist() {
-    let aliases = {};
-
-    aliases = Object.assign({}, aliases, {
-        './bittorrent': './empty.js'
-    });
-
-
-    return aliases;
 }
 
 const multiConfig = [

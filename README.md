@@ -1,8 +1,9 @@
 <h1 align="center"><a href="" target="_blank" rel="noopener noreferrer"><img width="250" src="figs/cdnbye.png" alt="cdnbye logo"></a></h1>
-<h4 align="center">It's time to say bye to CDN.</h4>
+<h4 align="center">Save Your Bandwidth using WebRTC.</h4>
 <p align="center">
   <a href="https://www.npmjs.com/package/cdnbye"><img src="https://img.shields.io/npm/v/cdnbye.svg?style=flat" alt="npm"></a>
    <a href="https://www.jsdelivr.com/package/npm/cdnbye"><img src="https://data.jsdelivr.com/v1/package/npm/cdnbye/badge" alt="jsdelivr"></a>
+  <a href="https://github.com/cdnbye/hlsjs-p2p-engine/tree/master/dist"><img src="https://badge-size.herokuapp.com/cdnbye/hlsjs-p2p-engine/master/dist/hlsjs-p2p-engine.min.js?compression=gzip&style=flat-square" alt="size"></a>
  <a href="https://www.jsdelivr.com/package/npm/cdnbye"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
 </p>
 
@@ -13,7 +14,7 @@ This JS library implements [WebRTC](https://en.wikipedia.org/wiki/WebRTC) datach
 This library is a part of CDNBye project which attempts to deliver high quality video streams, decreasing the number of requests to CDN servers, reducing the cost of transmission and enhancing system’s scalability. As the name suggests, CDNBye will help you offload bandwidth from expensive traditional CDNs，while also maximizing a user’s viewing experience.
 
 ## Playground
-Open at least tow tap in your browser: [demo](http://cdnbye.gitee.io/hlsjs-p2p-engine/videojs-demo.html)
+[Click me!](http://cdnbye.gitee.io/hlsjs-p2p-engine/videojs-demo.html)
 
 ## Getting Started
 #### Quick Start Demo
@@ -109,13 +110,27 @@ hls.on(Hls.Events.MANIFEST_PARSED,function() {
 ## API and Configuration
 See [API.md](docs/English/API.md)
 
-## How it works
+## Signaling Server
+To communicate with another peer you simply need to exchange contact information and the rest will be done by WebRTC. The process of connecting to the other peers is also known as signaling.
+- Deploy your own Signaling Server (recommended)
+    - [gosignaler](https://github.com/cdnbye/gosignaler) (written by Golang)
+    - [php-signaler](https://github.com/cdnbye/php-signaler) (written by PHP)
+- Use free Signaling Server
+    - 'wss://signal.cdnbye.com/wss' (provided by cdnbye, sometimes overloaded, not recommended)
+    - 'wss://free.freesignal.net' (contributed by freesignal.net, recommended)
+
+## They are using CDNBye
+[<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1531253035445&di=7af6cc9ad4abe3d06ba376af22d85131&imgtype=0&src=http%3A%2F%2Fimg.kuai8.com%2Fattaches%2Fintro%2F1213%2F201612131436417407.png" width="120">](http://egame.qq.com/)
+
+Your website here – Send a pull request with your logo and URL!
+
+## How It Works
 See [design.md](docs/English/design.md)
 
 ## FAQ
 We have collected some [frequently asked questions](docs/English/FAQ.md). Before reporting an issue, please search if the FAQ has the answer to your problem.
 
-## Player integration
+## Player Integration
 - [videojs](http://videojs.com/)
     - See [videojs-demo.html](demo/videojs-demo.html)
 - [flowplayer](https://flowplayer.com/)
@@ -128,6 +143,8 @@ We have collected some [frequently asked questions](docs/English/FAQ.md). Before
     - See [clappr-demo.html](demo/clappr-demo.html)
 - [MediaElement.js](http://www.mediaelementjs.com/)
     - See [mediaelement-demo.html](demo/mediaelement-demo.html)
+- [TCPlayer](https://cloud.tencent.com/document/product/267/7479)(Tencent Cloud Player)
+    - See [tcplayer-demo.html](demo/tcplayer-demo.html)
 - `Add your customized player here`
     - CDNBye can be integrated into any HTML5 video player that with hls.js built in.
 
