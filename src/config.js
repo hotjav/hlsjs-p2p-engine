@@ -9,15 +9,14 @@ let defaultP2PConfig = {
 
     p2pEnabled: true,                           // 是否开启P2P，默认true
 
-    dcRequestTimeout: 3,                        // datachannel接收二进制数据的超时时间
-    dcUploadTimeout: 3,                         // datachannel上传二进制数据的超时时间
+    dcRequestTimeout: 4,                        // datachannel接收二进制数据的超时时间
+    dcUploadTimeout: 4,                         // datachannel上传二进制数据的超时时间
     dcPings: 5,                                 // datachannel发送ping数据包的数量
-    dcTolerance: 4,                             // 请求超时或错误多少次淘汰该peer
+    dcTolerance: 5,                             // 请求超时或错误多少次淘汰该peer
 
     packetSize: 64*1024,                        // 每次通过datachannel发送的包的大小
     maxBufSize: 1024*1024*50,                   // p2p缓存的最大数据量
-    loadTimeout: 3,                             // p2p下载的超时时间
-    tsStrictMatched: false,                     // p2p传输的ts是否要严格匹配（去掉查询参数），默认false
+    loadTimeout: 3.5,                             // p2p下载的超时时间
 
     enableLogUpload: false,                      // 上传log到服务器，默认false
     logUploadAddr: "wss://api.cdnbye.com/trace", // log上传地址
@@ -27,6 +26,11 @@ let defaultP2PConfig = {
     tag: '',                                     // 用户自定义标签，可用于在后台查看参数调整效果
 
     channelId: null,                             // 标识channel的字段，默认是'[path]-[protocol version]'
+    segmentId: null,                             // 标识ts文件的字段，默认是'[level]-[sn]'
+
+    webRTCConfig: {},                            // 传入channelConfig用于createDataChannel，config用于RTCPeerConnection
+
+    p2pBlackList: ['aac', 'mp3'],                // 不参与P2P的文件类型，防止报错
 
     ...btConfig
 };

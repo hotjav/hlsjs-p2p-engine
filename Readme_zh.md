@@ -1,6 +1,6 @@
 <h1 align="center"><a href="" target="_blank" rel="noopener noreferrer"><img width="250" src="figs/cdnbye.png" alt="cdnbye logo"></a></h1>
 <h4 align="center">Save Your Bandwidth using WebRTC.</h4>
-<h4 align="center">视频网站省流量神器.</h4>
+<h4 align="center">视频网站省流量&加速神器.</h4>
 <p align="center">
   <a href="https://www.npmjs.com/package/cdnbye"><img src="https://img.shields.io/npm/v/cdnbye.svg?style=flat" alt="npm"></a>
    <a href="https://www.jsdelivr.com/package/npm/cdnbye"><img src="https://data.jsdelivr.com/v1/package/npm/cdnbye/badge" alt="jsdelivr"></a>
@@ -9,8 +9,8 @@
 
 **[English](README.md)**
 
-
-随着H5的普及，flash逐渐被淘汰已成为不可逆转的趋势。而在H5采用的视频传输格式中，hls由于兼容ios和android、可以穿过任何允许HTTP数据通过的防火墙、容易使用内容分发网络来传输媒体流和码率自适应等众多优势而在业界得到广泛使用。通过使用[hls.js](https://github.com/video-dev/hls.js)这个第三方库，几乎所有现代浏览器都可以播放hls视频。hls天生分片传输的优势，使其可以采用p2p的方式进行传输，从而减小服务器的负担。在web端，无插件化实现p2p传输能力的最好选择就是[WebRTC](https://en.wikipedia.org/wiki/WebRTC)技术，与hls.js类似，WebRTC也支持几乎所有现代浏览器。本项目的目标是开发一个hls.js的插件，通过WebRTC datachannel技术，在不影响用户体验的前提下，最大化p2p率，从而为CP节省流量成本。
+P2P技术使观看相同内容的用户之间可以相互分享数据，不仅能效降低视频/直播网站的带宽成本，还可以提升用户的播放体验，降低卡顿、二次缓存的发生率。
+另外，随着H5的普及，flash逐渐被淘汰已成为不可逆转的趋势。而在H5采用的视频传输格式中，hls由于兼容ios和android、可以穿过任何允许HTTP数据通过的防火墙、容易使用内容分发网络来传输媒体流和码率自适应等众多优势而在业界得到广泛使用。通过使用[hls.js](https://github.com/video-dev/hls.js)这个第三方库，几乎所有现代浏览器都可以播放hls视频。hls天生分片传输的优势，使其可以采用p2p的方式进行传输，从而减小服务器的负担。在web端，无插件化实现p2p传输能力的最好选择就是[WebRTC](https://en.wikipedia.org/wiki/WebRTC)技术，与hls.js类似，WebRTC也支持几乎所有现代浏览器。本项目是一个hls.js的插件，通过WebRTC datachannel技术，在不影响用户体验的前提下，最大化p2p率，是面向未来的Web P2P技术。
 
 该插件的优势如下：
 - 采用仿BT算法，简化BT的流程，并且针对流媒体的特点对算法进行调整
@@ -20,8 +20,11 @@
 - 通过有效的调度策略来保证用户的播放体验以及p2p率
 - Tracker服务器根据访问IP的ISP、地域等进行智能调度
 
+## 注意
+v0.2.x已经废弃，请升级到最新版本。
+
 ## 演示Demo
-打开2个相同的网页：[demo](http://cdnbye.gitee.io/hlsjs-p2p-engine/videojs-demo.html)
+打开2个相同的网页：[demo](https://cdnbye.github.io/hlsjs-p2p-demo/)
 
 ## 快速入门
 #### 快速入门Demo
@@ -37,6 +40,8 @@
 <script src="https://cdn.jsdelivr.net/npm/cdnbye@latest"></script>
 ```
 就是这么简单！
+#### 集成到第三方HTML5播放器
+参考[demos](https://github.com/cdnbye/hlsjs-p2p-engine/blob/master/Readme_zh.md#%E6%92%AD%E6%94%BE%E5%99%A8%E9%9B%86%E6%88%90), 也许你可以尝试下[P2P-DPlayer](https://github.com/cdnbye/P2P-DPlayer)和[P2P-CKPlayer](https://github.com/cdnbye/P2P-CKPlayer)。
 
 ## 浏览器支持情况
 由于WebRTC已成为HTML5标准，目前大部分主流浏览器都已经支持。CDNBye的浏览器兼容性取决于WebRTC和hls.js。需要注意的是iOS版Safari由于不支持MediaSource API，因此也不支持hls.js(不过Safari原生支持HLS播放)。
@@ -48,29 +53,13 @@ Hls.js | Yes | Yes | Yes | No | Yes | Yes | Yes
 CDNBye | Yes | Yes | Yes | No | Yes | No | No 
 
 ## 集成
-
-#### 通过script标签集成
-引入已经和hls.js打包的最新版本（推荐）：
+通过script标签引入已经和hls.js打包的最新版本（推荐）：
 ```javascript
 <script src="https://cdn.jsdelivr.net/npm/cdnbye@latest"></script>
 ```
 或者引入没有与hls.js打包的独立版本：
 ```javascript
 <script src="https://cdn.jsdelivr.net/npm/cdnbye@latest/dist/hlsjs-p2p-engine.min.js"></script>
-```
-
-#### 通过NPM安装依赖
-```
-cd yourProject && npm install cdnbye --save
-```
-在项目中通过import/require引入依赖包：
-```javascript
-import Hls from 'cdnbye';   // 打包了hls.js的依赖
-```
-或者
-```javascript
-import Hls from 'hls.js';     // 需要先执行"npm install --save hls.js"
-import P2PEngine from 'cdnbye/dist/hlsjs-p2p-engine';   // 没有打包hls.js的JS库
 ```
 
 ## 使用方法
@@ -104,7 +93,9 @@ var p2pConfig = {
 };
 
 var hls = new Hls(hlsjsConfig);
-var p2pEngine = new P2PEngine(hls, p2pConfig);        // Key step
+if (P2PEngine.isSupported()) {
+    new P2PEngine(hls, p2pConfig);        // Key step
+}
 
 // Use `hls` just like your usual hls.js…
 hls.loadSource(contentUrl);
@@ -113,6 +104,32 @@ hls.on(Hls.Events.MANIFEST_PARSED,function() {
     video.play();
 });
 ```
+
+## 播放器集成
+- [videojs](http://videojs.com/)
+    - 参见 [videojs-demo.html](demo/videojs-demo.html)
+- [flowplayer](https://flowplayer.com/)
+    - 参见 [flowplayer-demo.html](demo/flowplayer-demo.html)
+- [jwplayer](https://www.jwplayer.com/)
+    - 参见 [jwplayer-demo.html](demo/jwplayer-demo.html)
+- [DPlayer](https://github.com/MoePlayer/DPlayer)
+    - 参见 [dplayer-demo.html](demo/dplayer-demo.html)，或者嵌入hlsjs-p2p-engine的[P2P-DPlayer](https://github.com/cdnbye/P2P-DPlayer)
+- [P2P-CKPlayer](https://github.com/cdnbye/P2P-CKPlayer)
+    - 嵌入hlsjs-p2p-engine的[CKPlayer](http://www.ckplayer.com/).
+- [clappr](https://github.com/clappr/clappr)
+    - 参见 [clappr-demo.html](demo/clappr-demo.html)
+- [MediaElement.js](http://www.mediaelementjs.com/)
+    - 参见 [mediaelement-demo.html](demo/mediaelement-demo.html)
+- [TCPlayer](https://cloud.tencent.com/document/product/267/7479)(腾讯云播放器)
+    - 参见 [tcplayer-demo.html](demo/tcplayer-demo.html)
+- [Chimee](http://chimee.org/)
+    - 参见 [chimee-demo.html](demo/chimee-demo.html)
+- `欢迎贡献您的播放器demo`
+    - CDNBye可以集成到内置hls.js的任何H5视频播放器中！
+
+## CDN
+- [jsDelivr](https://www.jsdelivr.com/package/npm/cdnbye)
+- [unpkg](https://unpkg.com/cdnbye@latest/)
 
 ## API文档
 参见 [API.md](docs/中文/API.md)
@@ -137,26 +154,12 @@ hls.on(Hls.Events.MANIFEST_PARSED,function() {
 ## FAQ
 我们收集了一些[常见问题](docs/中文/常见问题.md)。在报告issue之前请先查看一下。
 
-## 播放器集成
-- [videojs](http://videojs.com/)
-    - 参见 [videojs-demo.html](demo/videojs-demo.html)
-- [flowplayer](https://flowplayer.com/)
-    - 参见 [flowplayer-demo.html](demo/flowplayer-demo.html)
-- [jwplayer](https://www.jwplayer.com/)
-    - 参见 [jwplayer-demo.html](demo/jwplayer-demo.html)
-- [DPlayer](https://github.com/MoePlayer/DPlayer)
-    - 参见 [dplayer-demo.html](demo/dplayer-demo.html)
-- [clappr](https://github.com/clappr/clappr)
-    - 参见 [clappr-demo.html](demo/clappr-demo.html)
-- [MediaElement.js](http://www.mediaelementjs.com/)
-    - 参见 [mediaelement-demo.html](demo/mediaelement-demo.html)
-- [TCPlayer](https://cloud.tencent.com/document/product/267/7479)(腾讯云播放器)
-    - 参见 [tcplayer-demo.html](demo/tcplayer-demo.html)
-- `欢迎贡献您的播放器demo`
-    - CDNBye可以集成到内置hls.js的任何H5视频播放器中！
-    
+## 联系我们
+邮箱：service@cdnbye.com
+
+<!--
 ## 捐赠
 您的捐赠将用于购买服务器以及维持该开源项目的其它开销：）
 
 <img width="250" src="figs/pay.jpeg" alt="cdnbye logo" align="center">
-
+-->

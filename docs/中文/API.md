@@ -1,35 +1,40 @@
 ## 使用文档
+CDNBye通过WebRTC datachannel技术和BT算法，在观看同一视频/直播的用户之间构建P2P网络，在节省带宽成本的同时，提升用户的播放体验。
 
-CDNBye implements [WebRTC](https://en.wikipedia.org/wiki/WebRTC) datachannel to scale live/vod video streaming by peer-to-peer network using bittorrent-like protocol.
-
-To use CDNBye hlsjs-p2p-engine, WebRTC support is required (Chrome, Firefox, Opera, Safari).
-
-#### 安装
-```bash
-npm install cdnbye --save
-```
+采用本插件的前提是浏览器支持WebRTC (Chrome, Firefox, Opera, Safari)。
 
 #### 快速开始
 ```javascript
-  var Hls = require('cdnbye');
-  var video = document.getElementById('video');
-  if(Hls.isSupported()) {
-    var hls = new Hls();
-    hls.loadSource('https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8');
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED,function() {
-      video.play();
-    });
-  }
+<script src="https://cdn.jsdelivr.net/npm/cdnbye@latest"></script>
+<video id="video" controls></video>
+<script>
+    if(Hls.isSupported()) {
+        var video = document.getElementById('video');
+        var hls = new Hls({
+            p2pConfig: {
+                logLevel: false,
+            }
+        });
+        hls.loadSource('https://video-dev.github.io/streams/x36xhzz/url_2/193039199_mp4_h264_aac_ld_7.m3u8');
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED,function(event, data) {
+            video.play();
+        });
+        hls.p2pEngine.on('stats', function (stats) {
+            console.log(`totalP2PDownloaded ${stats.totalP2PDownloaded}KB`);
+        });
+    }
+</script>
 ```
 
 ## 在Hls.js增加的新API
 
 ### `Hls.engineVersion` (static method)
-Show the current version of CDNBye plugin.
+当前插件的版本号
 
 ### `Hls.WEBRTC_SUPPORT` (static method)
-Is WebRTC natively supported in the environment?
+判断当前浏览器是否支持WebRTC
+
 ```javascript
 if (Hls.WEBRTC_SUPPORT) {
   // WebRTC is supported
@@ -38,60 +43,104 @@ if (Hls.WEBRTC_SUPPORT) {
 }
 ```
 
-### `var hls = new Hls([opts]);`
-Create a new `Hls` instance.
+### `var hls = new Hls({p2pConfig: [opts]});`  
+创建一个新的`Hls`实例。
 
-If `opts` is specified, then the default options (shown below) will be overridden.
+### `var engine = hls.p2pEngine;`
+从`Hls`实例中获取`P2PEngine`实例。
 
+如果指定了`opts`，那么对应的默认值将会被覆盖。
+
+| 字段 | 类型 | 默认值 | 描述 |
+| :-: | :-: | :-: | :-: |
+| `logLevel` | string or boolean | 'none' | log的等级，分为debug、info、warn、error、none，设为true等于debug，设为false等于none。
+| `announce` | string | 'https://api.cdnbye.com/v1' | tracker服务器地址。
+| `wsSignalerAddr` | string | 'wss://signal.cdnbye.com/wss' | 信令服务器地址。
+| `wsMaxRetries` | number | 3 |websocket连接重试次数。
+| `wsReconnectInterval` | number | 5 | websocket重连时间间隔。
+| `loadTimeout` | number | 3 | p2p下载的超时时间。
+| `maxBufSize` | number | 1024 * 1024 * 50 | p2p缓存的最大数据量。
+| `p2pEnabled` | boolean | true | 是否开启P2P。
+| `channelId` | function | - | 标识channel的字段，同一个channel的用户可以共享数据。（参考高级用法）
+| `segmentId` | function | - | 标识ts文件的字段，防止相同ts文件具有不同的路径。（参考高级用法）
+| `packetSize` | number | 64 * 1024 | 每次通过datachannel发送的包的大小，64KB适用于较新版本的浏览器，如果要兼容低版本浏览器可以设置成16KB。
+| `webRTCConfig` | Object | {} | 用于配置stun和datachannel的[字典](https://github.com/feross/simple-peer)。
+
+## P2PEngine API
+
+### `var engine = new P2PEngine(hlsjs, p2pConfig);`
+实例化`P2PEngine`。也可以从`Hls`实例获取`P2PEngine`实例：
 ```javascript
-{
-    // hlsjsConfig options provided by hls.js
-    p2pConfig: {
-        logLevel: string or boolean         // log的level，分为debug、info、warn、error、none，设为true等于debug，设为false等于none，默认none
-        announce: string                    // tracker服务器地址
-        wsSignalerAddr: string              // 信令服务器地址 (default=wss://signal.cdnbye.com/wss)
-        wsMaxRetries: number                // websocket连接重试次数 (default=3)
-        wsReconnectInterval: number         // websocket重连时间间隔 (default=5)
-        loadTimeout: number                 // p2p下载的超时时间 (default=3)
-        maxBufSize: number                  // p2p缓存的最大数据量 (default=1024*1024*50)
-        p2pEnabled: boolean                 // 是否开启P2P (default=true)
-        tsStrictMatched: boolean            // p2p传输的ts是否要严格匹配（去掉查询参数） (default=false)
-        tag: string                         // 用户自定义标签，可用于在后台查看参数调整效果 (default=[hlsjs version])
-        // advanced options
-        channelId: function                 // 标识channel的字段 (default: see utils/toolFuns)
-        dcRequestTimeout: number            // datachannel接收二进制数据的超时时间 (default=3)
-        dcUploadTimeout: number             // datachannel上传二进制数据的超时时间 (default=3)
-        packetSize: number                  // 每次通过datachannel发送的包的大小(default=64*1024)
-        enableLogUpload: boolean            // 上传log到服务器 (default=false)
-        logUploadAddr: string               // log上传地址 (default=wss://api.cdnbye.com/trace)
-        logUploadLevel: string              // log上传level，分为debug、info、warn、error、none (default=warn)                          
+var hls = new Hls();
+var engine = hls.p2pEngine;
+```
+
+### `engine.version`
+获取`P2PEngine`的版本号。
+
+### `engine.isSupported()`
+判断当前浏览器是否支持WebRTC data channel。
+
+### `engine.enableP2P()`
+在p2p暂停或未启动情况下启动p2p。
+
+### `engine.disableP2P()`
+停止p2p并释放内存。
+
+### `engine.destroy()`
+停止p2p、销毁engine并释放内存。在Hls.js销毁时会自动调用。
+
+## P2PEngine事件
+
+### `engine.on('peerId', function (peerId) {})`
+当从服务端获取到peerId时回调该事件。
+
+### `engine.on('peers', function (peers) {})`
+当与新的节点成功建立p2p连接时回调该事件。
+
+### `engine.on('stats', function (stats) {})`
+该回调函数可以获取p2p信息，包括：</br>
+stats.totalHTTPDownloaded: 从HTTP(CDN)下载的数据量（单位KB）</br>
+stats.totalP2PDownloaded: 从P2P下载的数据量（单位KB）</br>
+stats.totalP2PUploaded: P2P上传的数据量（单位KB）
+
+## 高级用法
+### 解决动态m3u8路径问题
+某些流媒体提供商的m3u8是动态生成的，不同节点的m3u8地址不一样，例如example.com/clientId1/file.m3u8和example.com/clientId2/file.m3u8,
+而本插件默认使用m3u8作为channelId。这时候就要构造一个共同的chanelId，使实际观看同一直播/视频的节点处在相同频道中。
+```javascript
+p2pConfig: {
+    channelId: function (m3u8Url) {
+        const formatedUrl = format(m3u8Url);   // 忽略差异部分，构造一个一致的channelId
+        return formatedUrl;
     }
 }
 ```
 
-## P2PEngine事件
+### 解决动态ts路径问题
+类似动态m3u8路径问题，相同ts文件的路径也可能有差异，这时候需要忽略ts路径差异的部分。
+```javascript
+p2pConfig: {
+    segmentId: function (level, sn, tsUrl) {
+        const formatedUrl = format(tsUrl);  // 忽略路径差异的部分，使相同的ts文件具有相同的segmentId
+        return formatedUrl;
+    }
+}
+```
 
-### `hls.engine.on('peerId', function (peerId) {})`
-Emitted when the peer Id of this client is obtained from server.
-
-### `hls.engine.on('peers', function (peers) {})`
-Emitted when successfully connected with new peer.
-
-### `hls.engine.on('stats', function ({totalHTTPDownloaded, totalP2PDownloaded, totalP2PUploaded}) {})`
-Emitted when data is downloaded/uploaded.
-totalHTTPDownloaded: total data downloaded by HTTP(KB).
-totalP2PDownloaded: total data downloaded by P2P(KB).
-totalP2PUploaded: total data uploaded by P2P(KB).
-
-## P2PEngine运行时API
-
-### `hls.engine.enableP2P()`
-Resume P2P if it has been stopped.
-
-### `hls.engine.disableP2P()` （暂未实现）
-Disable P2P if it is not stopped.
-
-
+### 配置STUN服务器
+```javascript
+p2pConfig: {
+    webRTCConfig: { 
+        config: {         // custom webrtc configuration (used by RTCPeerConnection constructor)
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }, 
+                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+            ] 
+        }
+    }
+}
+```
 
 
 

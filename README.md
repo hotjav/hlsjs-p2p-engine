@@ -13,8 +13,11 @@ This JS library implements [WebRTC](https://en.wikipedia.org/wiki/WebRTC) datach
 
 This library is a part of CDNBye project which attempts to deliver high quality video streams, decreasing the number of requests to CDN servers, reducing the cost of transmission and enhancing system’s scalability. As the name suggests, CDNBye will help you offload bandwidth from expensive traditional CDNs，while also maximizing a user’s viewing experience.
 
+## Notice
+v0.2.x is deprecated, please update to the latest version.
+
 ## Playground
-[Click me!](http://cdnbye.gitee.io/hlsjs-p2p-engine/videojs-demo.html)
+[Click me!](https://cdnbye.github.io/hlsjs-p2p-demo/)
 
 ## Getting Started
 #### Quick Start Demo
@@ -30,6 +33,8 @@ with
 <script src="https://cdn.jsdelivr.net/npm/cdnbye@latest"></script>
 ```
 That's it!
+#### Integrate to HTML5 Players
+See [demos](https://github.com/cdnbye/hlsjs-p2p-engine#player-integration), maybe you want to try [P2P-DPlayer](https://github.com/cdnbye/P2P-DPlayer) and [P2P-CKPlayer](https://github.com/cdnbye/P2P-CKPlayer).
 
 ## Browser Support
 WebRTC has already been incorporated into the HTML5 standard and it is broadly deployed in modern browsers. The compatibility of CDNBye depends on the browser support of WebRTC and Hls.js. Please note that iOS Safari "Mobile" does not support the MediaSource API.
@@ -40,30 +45,14 @@ WebRTC | Yes | Yes | Yes | Yes | Yes | No | No
 Hls.js | Yes | Yes | Yes | No | Yes | Yes | Yes
 CDNBye | Yes | Yes | Yes | No | Yes | No | No 
 
-## Installation
-
-#### Pre-built Script
-Include the latest version bundled with hls.js(recommended): 
+## Include
+Include the pre-built script of latest version bundled with hls.js(recommended): 
 ```javascript
 <script src="https://cdn.jsdelivr.net/npm/cdnbye@latest"></script>
 ```
 Or include the latest version without hls.js:
 ```javascript
 <script src="https://cdn.jsdelivr.net/npm/cdnbye@latest/dist/hlsjs-p2p-engine.min.js"></script>
-```
-
-#### Via NPM
-```
-cd yourProject && npm install cdnbye --save
-```
-In your application import/require the package you want to use as the following examples:
-```javascript
-import Hls from 'cdnbye';   // the package with hls.js
-```
-Or 
-```javascript
-import Hls from 'hls.js';     // please run "npm install --save hls.js" first
-import P2PEngine from 'cdnbye/dist/hlsjs-p2p-engine';   // the package without hls.js
 ```
 
 ## Usage
@@ -97,7 +86,9 @@ var p2pConfig = {
 };
 
 var hls = new Hls(hlsjsConfig);
-var p2pEngine = new P2PEngine(hls, p2pConfig);        // Key step
+if (P2PEngine.isSupported()) {
+    new P2PEngine(hls, p2pConfig);        // Key step
+}
 
 // Use `hls` just like your usual hls.js…
 hls.loadSource(contentUrl);
@@ -106,6 +97,32 @@ hls.on(Hls.Events.MANIFEST_PARSED,function() {
     video.play();
 });
 ```
+
+## Player Integration
+- [videojs](http://videojs.com/)
+    - See [videojs-demo.html](demo/videojs-demo.html)
+- [flowplayer](https://flowplayer.com/)
+    - See [flowplayer-demo.html](demo/flowplayer-demo.html)
+- [jwplayer](https://www.jwplayer.com/)
+    - See [jwplayer-demo.html](demo/jwplayer-demo.html)
+- [DPlayer](https://github.com/MoePlayer/DPlayer)
+    - See [dplayer-demo.html](demo/dplayer-demo.html) or [P2P-DPlayer](https://github.com/cdnbye/P2P-DPlayer) with hlsjs-p2p-engine built-in.
+- [P2P-CKPlayer](https://github.com/cdnbye/P2P-CKPlayer)
+    - [CKPlayer](http://www.ckplayer.com/) with hlsjs-p2p-engine built-in.
+- [clappr](https://github.com/clappr/clappr)
+    - See [clappr-demo.html](demo/clappr-demo.html)
+- [MediaElement.js](http://www.mediaelementjs.com/)
+    - See [mediaelement-demo.html](demo/mediaelement-demo.html)
+- [TCPlayer](https://cloud.tencent.com/document/product/267/7479)(Tencent Cloud Player)
+    - See [tcplayer-demo.html](demo/tcplayer-demo.html)
+- [Chimee](http://chimee.org/)
+    - See [chimee-demo.html](demo/chimee-demo.html)
+- `Add your customized player here`
+    - CDNBye can be integrated into any HTML5 video player that with hls.js built in.
+
+## CDN
+- [jsDelivr](https://www.jsdelivr.com/package/npm/cdnbye)
+- [unpkg](https://unpkg.com/cdnbye@latest/)
 
 ## API and Configuration
 See [API.md](docs/English/API.md)
@@ -130,24 +147,8 @@ See [design.md](docs/English/design.md)
 ## FAQ
 We have collected some [frequently asked questions](docs/English/FAQ.md). Before reporting an issue, please search if the FAQ has the answer to your problem.
 
-## Player Integration
-- [videojs](http://videojs.com/)
-    - See [videojs-demo.html](demo/videojs-demo.html)
-- [flowplayer](https://flowplayer.com/)
-    - See [flowplayer-demo.html](demo/flowplayer-demo.html)
-- [jwplayer](https://www.jwplayer.com/)
-    - See [jwplayer-demo.html](demo/jwplayer-demo.html)
-- [DPlayer](https://github.com/MoePlayer/DPlayer)
-    - See [dplayer-demo.html](demo/dplayer-demo.html)
-- [clappr](https://github.com/clappr/clappr)
-    - See [clappr-demo.html](demo/clappr-demo.html)
-- [MediaElement.js](http://www.mediaelementjs.com/)
-    - See [mediaelement-demo.html](demo/mediaelement-demo.html)
-- [TCPlayer](https://cloud.tencent.com/document/product/267/7479)(Tencent Cloud Player)
-    - See [tcplayer-demo.html](demo/tcplayer-demo.html)
-- `Add your customized player here`
-    - CDNBye can be integrated into any HTML5 video player that with hls.js built in.
-
+## Contact Us
+Email: service@cdnbye.com
 
 
 

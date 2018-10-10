@@ -33,13 +33,14 @@
             // Other hlsjsConfig options provided by hls.js
             p2pConfig: {
                 wsSignalerAddr: 'wss://free.freesignal.net',
+                tag: 'jwplayer',
                 // Other p2pConfig options provided by CDNBye
             }
         },
     });
 
     jwplayer().on('play', function () {
-        jwplayer().hls.engine.on('stats', function ({totalHTTPDownloaded, totalP2PDownloaded}) {
+        jwplayer().hls.p2pEngine.on('stats', function ({totalHTTPDownloaded, totalP2PDownloaded}) {
             // get totalHTTPDownloaded and totalP2PDownloaded here
         })
     })
